@@ -6,7 +6,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
 
+import java.security.Key;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -34,6 +36,31 @@ public class StudentImpl {
             student.setStudentBooks(oldStu.getStudentBooks());
             Student savedStu = studentRepo.save(student);
             return savedStu;
+    }
+
+  //    Patch Mapping
+    public Student updatePartialStudent(int id, Map<String,Object> oldStu){
+        Student student = studentRepo.findById(id).orElseThrow(()->new StudentException("Student Not Found"));
+
+        oldStu.forEach((key,value)->{
+            switch (key) {
+                case "studentname":
+                    student.setStudentName((String) value);
+                    break;
+                case "studentrollnumber":
+                    student.setStudentRollNumber((int) value);
+                    break;
+                case "studentemail":
+                    student.setStudentEmail((String) value);
+                    break;
+                case "studentbooks":
+                    student.setStudentBooks((List<String>) value);
+                    break;
+                default:
+                    throw new IllegalArgumentException("Field " + key + " is not valid for partial updates");
+            }
+        });
+        return studentRepo.save(student);
     }
 
     public String deleteStudent(int id){
